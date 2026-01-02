@@ -1,0 +1,6 @@
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.js" }],
+  "env": {
+    "OPENROUTER_KEY": "@openrouter_key"
+  }
+}
