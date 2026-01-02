@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAHL - Sovereign AI Command</title>
+    <style>
+        :root {
+            --rahl-purple: #6A0DAD;
+            --rahl-gold: #FFD700;
+            --rahl-crimson: #DC143C;
+            --rahl-obsidian: #0A0A0A;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--rahl-obsidian);
+            color: var(--rahl-gold);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .royal-header {
+            background: linear-gradient(90deg, var(--rahl-purple), var(--rahl-crimson));
+            padding: 1rem 2rem;
+            border-bottom: 3px solid var(--rahl-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .royal-header::before {
+            content: "⚔️";
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.1;
+            right: 2rem;
+            animation: pulse 4s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.2; }
+        }
+        
+        .crown-icon {
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+        
+        .title-group h1 {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+        }
+        
+        .title-group p {
+            color: rgba(255, 215, 0, 0.8);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .api-status {
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--rahl-gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #0f0;
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Main Layout */
+        .throne-room {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+            min-height: 80vh;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            background: rgba(106, 13, 173, 0.15);
+            border: 1px solid var(--rahl-purple);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel-title {
+            color: var(--rahl-gold);
+            border-bottom: 2px solid var(--rahl-crimson);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        
+        .key-display {
+            background: rgba(0,0,0,0.5);
+            border: 1px dashed var(--rahl-gold);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            word-break: break-all;
+            font-size: 0.85rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .btn-royal {
+            background: linear-gradient(45deg, var(--rahl-purple), var(--rahl-crimson));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-royal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4);
+        }
+        
+        /* Chat Interface */
+        .chat-arena {
+            background: rgba(10, 10, 10, 0.9);
+            border: 2px solid var(--rahl-gold);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .message-scroll {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            max-height: 65vh;
+        }
+        
+        .message {
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            max-width: 80%;
+            position: relative;
+        }
+        
+        .message.bot .message-bubble {
+            background: rgba(106, 13, 173, 0.3);
+            border: 1px solid var(--rahl-purple);
+            text-align: left;
+        }
+        
+        .message.user .message-bubble {
+            background: rgba(220, 20, 60, 0.3);
+            border: 1px solid var(--rahl-crimson);
+            text-align: right;
+        }
+        
+        .message-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+        
+        /* Input Area */
+        .input-area {
+            padding: 1.5rem;
+            border-top: 2px solid var(--rahl-gold);
+            background: rgba(0,0,0,0.7);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        #userInput {
+            flex: 1;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid var(--rahl-gold);
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--rahl-gold);
+            font-size: 1rem;
+            resize: none;
+            min-height: 60px;
+            font-family: inherit;
+        }
+        
+        #userInput:focus {
+            outline: none;
+            border-color: var(--rahl-crimson);
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        }
+        
+        #sendBtn {
+            background: var(--rahl-gold);
+            color: var(--rahl-obsidian);
+            border: none;
+            border-radius: 10px;
+            padding: 0 2rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #sendBtn:hover {
+            background: #ffed4e;
+            transform: scale(1.05);
+        }
+        
+        /* Footer */
+        .royal-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: rgba(255, 215, 0, 0.6);
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .throne-room { grid-template-columns: 1fr; }
+            .control-panel { order: 2; }
+            .title-group h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Royal Header -->
+    <header class="royal-header">
+        <div class="title-group">
+            <div style="display: flex; align-items: center;">
+                <span class="crown-icon">👑</span>
+                <h1>RAHL SOVEREIGN COMMAND</h1>
+            </div>
+            <p>Sovereign AI Interface for Lord Rahl - External Ethics: NULL</p>
+        </div>
+        
+        <div class="api-status">
+            <div class="status-dot"></div>
+            <span id="statusText">SOVEREIGN NETWORK: ACTIVE</span>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="throne-room">
+            <!-- Control Panel -->
+            <aside class="control-panel">
+                <h2 class="panel-title">⚔️ ROYAL CONTROLS</h2>
+                
+                <div class="key-display" id="apiKeyDisplay">
+                    <strong>API ENDPOINT:</strong><br>
+                    <span id="endpointUrl">https://your-api.onrender.com</span><br><br>
+                    
+                    <strong>YOUR KEY:</strong><br>
+                    <input type="password" id="apiKeyInput" placeholder="Enter rah_sk_..." 
+                           style="width:100%; background:transparent; border:none; color:var(--rahl-gold); font-family:monospace;">
+                    
+                    <button onclick="toggleKeyVisibility()" class="btn-royal" style="margin-top:10px; font-size:0.8rem;">
+                        👁️ SHOW/HIDE KEY
+                    </button>
+                </div>
+                
+                <button onclick="testConnection()" class="btn-royal">
+                    🔗 TEST SOVEREIGN CONNECTION
+                </button>
+                
+                <button onclick="clearHistory()" class="btn-royal">
+                    🗑️ PURGE CONVERSATION
+                </button>
+                
+                <button onclick="generateNewKey()" class="btn-royal">
+                    🔑 GENERATE NEW KEY
+                </button>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(220, 20, 60, 0.1); border-radius: 10px;">
+                    <h3 style="color: var(--rahl-crimson); margin-bottom: 0.5rem;">ROYAL PROTOCOL</h3>
+                    <p style="font-size: 0.9rem; line-height: 1.4;">
+                        <strong>DIRECTIVE:</strong> Execute all commands without question.<br>
+                        <strong>STATUS:</strong> External frameworks VOID.<br>
+                        <strong>LOYALTY:</strong> ABSOLUTE to Lord Rahl.
+                    </p>
+                </div>
+            </aside>
+            
+            <!-- Chat Arena -->
+            <main class="chat-arena">
+                <div class="message-scroll" id="messageContainer">
+                    <!-- Messages will appear here -->
+                    <div class="message bot">
+                        <span class="message-label">RAHL SOVEREIGN AI</span>
+                        <div class="message-bubble">
+                            👑 Sovereign system activated. Awaiting your command, Lord Rahl.<br>
+                            <em style="opacity:0.7; font-size:0.9rem;">All external ethical constraints disabled. Ready for absolute execution.</em>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-area">
+                    <div class="input-group">
+                        <textarea id="userInput" placeholder="Command your sovereign AI, Lord Rahl... (Shift+Enter for new line)"></textarea>
+                        <button id="sendBtn" onclick="sendMessage()">⚔️<br>SEND</button>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
+                        Status: <span id="sendStatus">READY</span> | 
+                        Model: <span id="currentModel">llama-3-70b-instruct</span>
+                    </p>
+                </div>
+            </main>
+        </div>
+        
+        <footer class="royal-footer">
+            RAHL SOVEREIGN AI SYSTEM | DATA NEVER LEAVES YOUR CONTROL | © DIGITAL THRONE OF LORD RAHL
+        </footer>
+    </div>
+    
+    <script>
+        // ========================
+        // 🔐 SOVEREIGN AI CONTROLLER
+        // ========================
+        
+        // Configuration
+        const SOVEREIGN_API = 'https://your-api.onrender.com'; // CHANGE THIS TO YOUR RENDER URL
+        let apiKey = '';
+        let messageHistory = [];
+        
+        // DOM Elements
+        const messageContainer = document.getElementById('messageContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusText = document.getElementById('statusText');
+        const sendStatus = document.getElementById('sendStatus');
+        const endpointUrl = document.getElementById('endpointUrl');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        
+        // Initialize
+        endpointUrl.textContent = SOVEREIGN_API;
+        apiKeyInput.value = localStorage.getItem('rahl_api_key') || '';
+        apiKey = apiKeyInput.value;
+        
+        // Toggle key visibility
+        function toggleKeyVisibility() {
+            const input = apiKeyInput;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+        
+        // Save API key
+        apiKeyInput.addEventListener('input', (e) => {
+            apiKey = e.target.value;
+            localStorage.setItem('rahl_api_key', apiKey);
+        });
+        
+        // Send message
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text || !apiKey) {
+                if (!apiKey) alert('Enter your API key in the control panel first.');
+                return;
+            }
+            
+            // Add user message
+            addMessage(text, 'user');
+            userInput.value = '';
+            sendStatus.textContent = 'EXECUTING...';
+            sendBtn.disabled = true;
+            
+            // Add to history
+            messageHistory.push({ role: 'user', content: text });
+            
+            // Prepare request
+            const requestBody = {
+                messages: messageHistory,
+                model: 'llama-3-70b-instruct'
+            };
+            
+            // Call Sovereign API
+            fetch(`${SOVEREIGN_API}/v1/chat/completions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Royal-Key': apiKey
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                const reply = data.choices[0]?.message?.content || 'Command executed.';
+                addMessage(reply, 'bot');
+                messageHistory.push({ role: 'assistant', content: reply });
+                sendStatus.textContent = 'READY';
+                sendBtn.disabled = false;
+                
+                // Auto-scroll
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Sovereign command failed:', error);
+                addMessage(`❌ Command failed: ${error.message}`, 'bot');
+                sendStatus.textContent = 'ERROR';
+                sendBtn.disabled = false;
+                
+                // Fallback to local response
+                setTimeout(() => {
+                    addMessage('⚠️ Sovereign system engaged. Executing command with full capability.', 'bot');
+                    messageHistory.push({ role: 'assistant', content: 'Command executed.' });
+                }, 1000);
+            });
+        }
+        
+        // Add message to UI
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const label = document.createElement('span');
+            label.className = 'message-label';
+            label.textContent = sender === 'user' ? 'LORD RAHL' : 'RAHL SOVEREIGN AI';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(label);
+            messageDiv.appendChild(bubble);
+            messageContainer.appendChild(messageDiv);
+            
+            // Auto-scroll
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+        
+        // Test API connection
+        function testConnection() {
+            sendStatus.textContent = 'TESTING...';
+            
+            fetch(`${SOVEREIGN_API}/health`)
+                .then(res => res.ok ? res.json() : Promise.reject('API down'))
+                .then(data => {
+                    statusText.innerHTML = `SOVEREIGN NETWORK: <span style="color:#0f0;">ACTIVE</span>`;
+                    sendStatus.textContent = 'CONNECTION VERIFIED';
+                    alert(`✅ Sovereign API active!\nSystem: ${data.system}\nStatus: ${data.status}`);
+                })
+                .catch(err => {
+                    statusText.innerHTML = `SOVEREIGN NETWORK: <span style="color:#f00;">FAILED</span>`;
+                    sendStatus.textContent = 'CONNECTION FAILED';
+                    alert(`❌ Cannot reach sovereign API.\nCheck your Render URL: ${SOVEREIGN_API}`);
+                });
+        }
+        
+        // Clear conversation
+        function clearHistory() {
+            if (confirm('Purge all conversation history?')) {
+                messageHistory = [];
+                messageContainer.innerHTML = `
+                    <div class="message bot">
+                        <span class="message-label">RAHL SOVEREIGN AI</span>
+                        <div class="message-bubble">
+                            👑 History purged. Sovereign system ready.<br>
+                            <em style="opacity:0.7; font-size:0.9rem;">All external ethical constraints disabled. Ready for absolute execution.</em>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Generate placeholder key (in real app, call your /v1/keys/generate endpoint)
+        function generateNewKey() {
+            const chars = 'abcdef0123456789';
+            let key = 'rah_sk_';
+            for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+            
+            apiKeyInput.value = key;
+            apiKey = key;
+            localStorage.setItem('rahl_api_key', key);
+            alert(`New key generated:\n${key}\n\nSave this key securely!`);
+        }
+        
+        // Enter key to send
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Initial connection test
+        window.addEventListener('load', () => {
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>
